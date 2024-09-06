@@ -8,7 +8,7 @@ jobs:
     - npm -v
  - name: "sbom"
    script: # existing functionality
-     - cd node
+     - cd sbom/node
      - npm install
    addons:
      sbom:
