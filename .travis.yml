@@ -1,45 +1,32 @@
-os: linux
-dist: focal
-language: java
-jdk:
-  - openjdk8
 jobs:
-  include: 
-  - name: “test123” # existing functionality
-    script: # existing functionality
-      - java -version
-  - name: “sbom”
-    script: # existing functionality
-      - java -version
-      - cd test
-      - cat java/java_bom.json
-
-  - name: SBOM Node
-    os: linux
-    language: node_js
-    script:
-      - cd sbom/node
-      - npm install
-    addons:
-      sbom:
-        on:
-          branch: 'sbom'
-        run_phase: 'after_success'
-        output_format: 'cyclonedx-json'
-        input_dir: '/sbom/node'
-        output_dir: '/sbom/node'
+  include:
+    - os: linux
+      dist: focal
+      name: SBOM Ruby
+      os: linux
+      language: ruby
+      script:
+        - gem build ./sbom/ruby/hello_world.gemspec
+      addons:
+        sbom:
+          on:
+            branch: 'sbom'
+          run_phase: 'after_success'
+          output_format: 'cyclonedx-json'
+          input_dir: '/sbom/ruby'
+          output_dir: '/sbom/ruby'
       deploy:
-        - provider: releases
+        - provider: releases    # deploying to GitHub Releases
           edge: true
           file_glob: true
-          file: sbom/node/**/*
+          file: sbom/ruby/**/*
           skip_cleanup: true
           on:
             branch: sbom
-        - provider: s3
+        - provider: s3          # deploying to target AWS S3 Bucket
           edge: true
           bucket: "sbom-test"
           skip_cleanup: true
-          local_dir: sbom/node
+          local_dir: sbom/ruby
           on:
             branch: sbom
